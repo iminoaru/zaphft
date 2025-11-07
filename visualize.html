@@ -1,0 +1,770 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bench Data Visualization</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: #f5f5f5;
+            padding: 20px;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+        }
+
+        .drop-zone {
+            background: white;
+            border: 3px dashed #3498db;
+            border-radius: 8px;
+            padding: 60px 20px;
+            text-align: center;
+            margin-bottom: 20px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .drop-zone:hover, .drop-zone.dragover {
+            background: #e8f4f8;
+            border-color: #2980b9;
+        }
+
+        .drop-zone h2 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+
+        .drop-zone p {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #666;
+        }
+
+        .error {
+            background: #fee;
+            color: #c33;
+            padding: 15px;
+            border-radius: 4px;
+            margin: 20px 0;
+        }
+
+        .file-section {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+
+        .file-section h2 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 3px solid #3498db;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .stat-card {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 6px;
+            border-left: 4px solid #3498db;
+        }
+
+        .stat-card h3 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+            font-size: 16px;
+        }
+
+        .stat-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 6px 0;
+            font-size: 14px;
+        }
+
+        .stat-label {
+            color: #666;
+        }
+
+        .stat-value {
+            color: #2c3e50;
+            font-weight: 600;
+        }
+
+        .stat-value.positive {
+            color: #27ae60;
+        }
+
+        .stat-value.negative {
+            color: #e74c3c;
+        }
+
+        .chart-container {
+            margin-bottom: 20px;
+        }
+
+        .chart-container h3 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+
+        .chart-description {
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 15px;
+            padding: 10px;
+            background: #f8f9fa;
+            border-left: 3px solid #3498db;
+            border-radius: 4px;
+        }
+
+        .chart-wrapper {
+            position: relative;
+            height: 350px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+
+        th, td {
+            padding: 10px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+            font-size: 14px;
+        }
+
+        th {
+            background: #f8f9fa;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        tr:hover {
+            background: #f8f9fa;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📊 Bench Data Visualization</h1>
+        
+        <div class="drop-zone" id="dropZone">
+            <h2>📁 Drag & Drop JSON Files Here</h2>
+            <p>Or click to select all JSON files from the benches folder</p>
+            <input type="file" id="fileInput" accept=".json" multiple style="display: none;">
+        </div>
+        
+        <div id="loading" class="loading" style="display: none;">Processing files...</div>
+        <div id="error" class="error" style="display: none;"></div>
+        <div id="content"></div>
+    </div>
+
+    <script>
+        let allCharts = [];
+
+        const dropZone = document.getElementById('dropZone');
+        const fileInput = document.getElementById('fileInput');
+        const loading = document.getElementById('loading');
+        const error = document.getElementById('error');
+        const content = document.getElementById('content');
+
+        // Click to select files
+        dropZone.addEventListener('click', () => fileInput.click());
+
+        // File input change
+        fileInput.addEventListener('change', async (e) => {
+            const files = Array.from(e.target.files).filter(f => f.name.endsWith('.json'));
+            if (files.length > 0) {
+                await processFiles(files);
+            }
+        });
+
+        // Drag and drop
+        dropZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropZone.classList.add('dragover');
+        });
+
+        dropZone.addEventListener('dragleave', () => {
+            dropZone.classList.remove('dragover');
+        });
+
+        dropZone.addEventListener('drop', async (e) => {
+            e.preventDefault();
+            dropZone.classList.remove('dragover');
+            
+            const files = Array.from(e.dataTransfer.files).filter(f => f.name.endsWith('.json'));
+            if (files.length > 0) {
+                await processFiles(files);
+            }
+        });
+
+        async function processFiles(files) {
+            dropZone.style.display = 'none';
+            loading.style.display = 'block';
+            error.style.display = 'none';
+            content.innerHTML = '';
+
+            // Clear previous charts
+            allCharts.forEach(chart => chart.destroy());
+            allCharts = [];
+
+            try {
+                const fileData = await Promise.all(
+                    files.map(async (file) => {
+                        const text = await file.text();
+                        return { name: file.name, data: JSON.parse(text) };
+                    })
+                );
+
+                fileData.forEach(({ name, data }) => {
+                    visualizeFile(name, data);
+                });
+
+                loading.style.display = 'none';
+            } catch (err) {
+                loading.style.display = 'none';
+                error.style.display = 'block';
+                error.textContent = `Error: ${err.message}`;
+            }
+        }
+
+        function formatNumber(num) {
+            if (num === null || num === undefined) return 'N/A';
+            if (typeof num !== 'number') return num;
+            if (num >= 1e9) return (num / 1e9).toFixed(2) + 'B';
+            if (num >= 1e6) return (num / 1e6).toFixed(2) + 'M';
+            if (num >= 1e3) return (num / 1e3).toFixed(2) + 'K';
+            return num.toFixed(4);
+        }
+
+        function formatCurrency(num) {
+            if (num === null || num === undefined) return 'N/A';
+            return '$' + num.toFixed(2);
+        }
+
+        function formatPercent(num) {
+            if (num === null || num === undefined) return 'N/A';
+            return num.toFixed(2) + '%';
+        }
+
+        function visualizeFile(filename, data) {
+            const section = document.createElement('div');
+            section.className = 'file-section';
+            section.innerHTML = `<h2>${filename}</h2>`;
+            
+            const statsContainer = document.createElement('div');
+            statsContainer.className = 'stats-grid';
+
+            // Metadata
+            if (data.metadata) {
+                const metaCard = document.createElement('div');
+                metaCard.className = 'stat-card';
+                metaCard.innerHTML = `
+                    <h3>Metadata</h3>
+                    <div class="stat-item">
+                        <span class="stat-label">Strategy:</span>
+                        <span class="stat-value">${data.metadata.strategy_name || 'N/A'}</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Dataset Size:</span>
+                        <span class="stat-value">${data.metadata.dataset_size ? formatNumber(data.metadata.dataset_size) : 'N/A'}</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Duration:</span>
+                        <span class="stat-value">${data.metadata.duration_ms ? formatNumber(data.metadata.duration_ms) + ' ms' : 'N/A'}</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Throughput:</span>
+                        <span class="stat-value">${data.metadata.throughput ? formatNumber(data.metadata.throughput) + '/sec' : 'N/A'}</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Starting Capital:</span>
+                        <span class="stat-value">${data.metadata.starting_capital ? formatCurrency(data.metadata.starting_capital) : 'N/A'}</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Final Capital:</span>
+                        <span class="stat-value">${data.metadata.final_capital ? formatCurrency(data.metadata.final_capital) : 'N/A'}</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Return:</span>
+                        <span class="stat-value ${data.metadata.return_pct >= 0 ? 'positive' : 'negative'}">${data.metadata.return_pct !== undefined ? formatPercent(data.metadata.return_pct) : 'N/A'}</span>
+                    </div>
+                `;
+                statsContainer.appendChild(metaCard);
+            }
+
+            // Summary
+            if (data.summary) {
+                const summaryCard = document.createElement('div');
+                summaryCard.className = 'stat-card';
+                summaryCard.innerHTML = `
+                    <h3>Summary</h3>
+                    <div class="stat-item">
+                        <span class="stat-label">Total PnL:</span>
+                        <span class="stat-value ${data.summary.total_pnl >= 0 ? 'positive' : 'negative'}">${formatCurrency(data.summary.total_pnl)}</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Realized PnL:</span>
+                        <span class="stat-value ${data.summary.realized_pnl >= 0 ? 'positive' : 'negative'}">${formatCurrency(data.summary.realized_pnl)}</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Total Trades:</span>
+                        <span class="stat-value">${formatNumber(data.summary.total_trades)}</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Win Rate:</span>
+                        <span class="stat-value">${data.summary.win_rate ? formatPercent(data.summary.win_rate * 100) : 'N/A'}</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Winning Trades:</span>
+                        <span class="stat-value">${data.summary.winning_trades}</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Losing Trades:</span>
+                        <span class="stat-value">${data.summary.losing_trades}</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Total Volume:</span>
+                        <span class="stat-value">${formatCurrency(data.summary.total_volume)}</span>
+                    </div>
+                `;
+                statsContainer.appendChild(summaryCard);
+            }
+
+            section.appendChild(statsContainer);
+
+            // Performance charts
+            if (data.approaches && data.approaches.length > 0) {
+                const chartContainer = document.createElement('div');
+                chartContainer.className = 'chart-container';
+                chartContainer.innerHTML = '<h3>Performance Comparison</h3>';
+                const perfDesc = document.createElement('div');
+                perfDesc.className = 'chart-description';
+                perfDesc.textContent = 'Shows how fast different approaches can process data. Higher bars mean faster processing.';
+                chartContainer.appendChild(perfDesc);
+                
+                const chartWrapper = document.createElement('div');
+                chartWrapper.className = 'chart-wrapper';
+                
+                const perfCanvas = document.createElement('canvas');
+                perfCanvas.id = `perf-${filename.replace(/[^a-zA-Z0-9]/g, '-')}`;
+                chartWrapper.appendChild(perfCanvas);
+                chartContainer.appendChild(chartWrapper);
+                section.appendChild(chartContainer);
+
+                const perfCtx = perfCanvas.getContext('2d');
+                const perfChart = new Chart(perfCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: data.approaches.map(a => a.name),
+                        datasets: [{
+                            label: 'Throughput (per sec)',
+                            data: data.approaches.map(a => a.throughput_per_sec),
+                            backgroundColor: 'rgba(52, 152, 219, 0.8)',
+                            borderColor: 'rgba(52, 152, 219, 1)',
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                ticks: {
+                                    callback: function(value) {
+                                        return formatNumber(value);
+                                    },
+                                    maxTicksLimit: 10
+                                }
+                            }
+                        }
+                    }
+                });
+                allCharts.push(perfChart);
+
+                // Approaches table
+                const tableContainer = document.createElement('div');
+                tableContainer.className = 'chart-container';
+                tableContainer.innerHTML = `
+                    <h3>Performance Approaches</h3>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Approach</th>
+                                <th>Time per Snapshot (ns)</th>
+                                <th>Throughput (per sec)</th>
+                                <th>Total Duration (ms)</th>
+                                <th>Speedup</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${data.approaches.map(a => `
+                                <tr>
+                                    <td>${a.name}</td>
+                                    <td>${formatNumber(a.time_per_snapshot_ns)}</td>
+                                    <td>${formatNumber(a.throughput_per_sec)}</td>
+                                    <td>${formatNumber(a.total_duration_ms)}</td>
+                                    <td>${a.speedup_vs_optimized.toFixed(2)}x</td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                `;
+                section.appendChild(tableContainer);
+            }
+
+            // Helper function to sample timeseries data
+            function sampleData(data, maxPoints = 500) {
+                if (!data || data.length === 0) return [];
+                const sampleRate = Math.max(1, Math.floor(data.length / maxPoints));
+                return data.filter((_, i) => i % sampleRate === 0).slice(0, maxPoints);
+            }
+
+            // Helper function to create chart container
+            function createChartContainer(title, description) {
+                const container = document.createElement('div');
+                container.className = 'chart-container';
+                container.innerHTML = `<h3>${title}</h3>`;
+                if (description) {
+                    const desc = document.createElement('div');
+                    desc.className = 'chart-description';
+                    desc.textContent = description;
+                    container.appendChild(desc);
+                }
+                const wrapper = document.createElement('div');
+                wrapper.className = 'chart-wrapper';
+                container.appendChild(wrapper);
+                return { container, wrapper };
+            }
+
+            // PnL curve chart
+            if (data.timeseries && data.timeseries.pnl_curve && data.timeseries.pnl_curve.length > 0) {
+                const { container, wrapper } = createChartContainer(
+                    'PnL Curve Over Time',
+                    'Shows how your profit and loss changes over time. Going up means making money, going down means losing money.'
+                );
+                const canvas = document.createElement('canvas');
+                canvas.id = `pnl-${filename.replace(/[^a-zA-Z0-9]/g, '-')}`;
+                wrapper.appendChild(canvas);
+                section.appendChild(container);
+
+                const sampledData = sampleData(data.timeseries.pnl_curve);
+                const ctx = canvas.getContext('2d');
+                const chart = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: sampledData.map((d, i) => i),
+                        datasets: [{
+                            label: 'PnL',
+                            data: sampledData.map(d => d.value),
+                            borderColor: 'rgba(52, 152, 219, 1)',
+                            backgroundColor: 'rgba(52, 152, 219, 0.1)',
+                            borderWidth: 2,
+                            fill: true,
+                            tension: 0.1,
+                            pointRadius: 0
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            x: { ticks: { maxTicksLimit: 20 } },
+                            y: {
+                                ticks: {
+                                    callback: v => formatCurrency(v),
+                                    maxTicksLimit: 10
+                                }
+                            }
+                        },
+                        plugins: { legend: { display: false } }
+                    }
+                });
+                allCharts.push(chart);
+            }
+
+            // Position curve chart
+            if (data.timeseries && data.timeseries.position_curve && data.timeseries.position_curve.length > 0) {
+                const { container, wrapper } = createChartContainer(
+                    'Position Over Time',
+                    'Shows how much you own (positive) or owe (negative) over time. Zero means you have no position.'
+                );
+                const canvas = document.createElement('canvas');
+                canvas.id = `pos-${filename.replace(/[^a-zA-Z0-9]/g, '-')}`;
+                wrapper.appendChild(canvas);
+                section.appendChild(container);
+
+                const sampledData = sampleData(data.timeseries.position_curve);
+                const ctx = canvas.getContext('2d');
+                const chart = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: sampledData.map((d, i) => i),
+                        datasets: [{
+                            label: 'Position',
+                            data: sampledData.map(d => d.value),
+                            borderColor: 'rgba(46, 204, 113, 1)',
+                            backgroundColor: 'rgba(46, 204, 113, 0.1)',
+                            borderWidth: 2,
+                            fill: true,
+                            tension: 0.1,
+                            pointRadius: 0
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            x: { ticks: { maxTicksLimit: 20 } },
+                            y: {
+                                ticks: { maxTicksLimit: 10 },
+                                grid: {
+                                    color: (ctx) => {
+                                        if (ctx.tick.value === 0) return 'rgba(0, 0, 0, 0.5)';
+                                        return 'rgba(0, 0, 0, 0.1)';
+                                    }
+                                }
+                            }
+                        },
+                        plugins: { legend: { display: false } }
+                    }
+                });
+                allCharts.push(chart);
+            }
+
+            // Volume curve chart
+            if (data.timeseries && data.timeseries.volume_curve && data.timeseries.volume_curve.length > 0) {
+                const { container, wrapper } = createChartContainer(
+                    'Cumulative Volume Over Time',
+                    'Shows the total amount of trading activity over time. Steeper lines mean more trading happened.'
+                );
+                const canvas = document.createElement('canvas');
+                canvas.id = `vol-${filename.replace(/[^a-zA-Z0-9]/g, '-')}`;
+                wrapper.appendChild(canvas);
+                section.appendChild(container);
+
+                const sampledData = sampleData(data.timeseries.volume_curve);
+                const ctx = canvas.getContext('2d');
+                const chart = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: sampledData.map((d, i) => i),
+                        datasets: [{
+                            label: 'Volume',
+                            data: sampledData.map(d => d.value),
+                            borderColor: 'rgba(155, 89, 182, 1)',
+                            backgroundColor: 'rgba(155, 89, 182, 0.1)',
+                            borderWidth: 2,
+                            fill: true,
+                            tension: 0.1,
+                            pointRadius: 0
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            x: { ticks: { maxTicksLimit: 20 } },
+                            y: {
+                                ticks: {
+                                    callback: v => formatCurrency(v),
+                                    maxTicksLimit: 10
+                                }
+                            }
+                        },
+                        plugins: { legend: { display: false } }
+                    }
+                });
+                allCharts.push(chart);
+            }
+
+            // Drawdown chart
+            if (data.timeseries && data.timeseries.drawdown_curve && data.timeseries.drawdown_curve.length > 0) {
+                const { container, wrapper } = createChartContainer(
+                    'Drawdown Over Time',
+                    'Shows how far your account dropped from its highest point. Lower values mean bigger losses from your peak.'
+                );
+                const canvas = document.createElement('canvas');
+                canvas.id = `dd-${filename.replace(/[^a-zA-Z0-9]/g, '-')}`;
+                wrapper.appendChild(canvas);
+                section.appendChild(container);
+
+                const sampledData = sampleData(data.timeseries.drawdown_curve);
+                const ctx = canvas.getContext('2d');
+                const chart = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: sampledData.map((d, i) => i),
+                        datasets: [{
+                            label: 'Drawdown',
+                            data: sampledData.map(d => d.value),
+                            borderColor: 'rgba(231, 76, 60, 1)',
+                            backgroundColor: 'rgba(231, 76, 60, 0.2)',
+                            borderWidth: 2,
+                            fill: true,
+                            tension: 0.1,
+                            pointRadius: 0
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            x: { ticks: { maxTicksLimit: 20 } },
+                            y: {
+                                ticks: {
+                                    callback: v => formatCurrency(v),
+                                    maxTicksLimit: 10
+                                }
+                            }
+                        },
+                        plugins: { legend: { display: false } }
+                    }
+                });
+                allCharts.push(chart);
+            }
+
+            // Buy/Sell volume comparison
+            if (data.summary && data.summary.buy_volume !== undefined && data.summary.sell_volume !== undefined) {
+                const { container, wrapper } = createChartContainer(
+                    'Buy vs Sell Volume',
+                    'Compares how much you bought versus sold. Helps see if you\'re buying more or selling more overall.'
+                );
+                const canvas = document.createElement('canvas');
+                canvas.id = `bs-${filename.replace(/[^a-zA-Z0-9]/g, '-')}`;
+                wrapper.appendChild(canvas);
+                section.appendChild(container);
+
+                const ctx = canvas.getContext('2d');
+                const chart = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: ['Buy Volume', 'Sell Volume'],
+                        datasets: [{
+                            label: 'Volume',
+                            data: [data.summary.buy_volume, data.summary.sell_volume],
+                            backgroundColor: ['rgba(46, 204, 113, 0.8)', 'rgba(231, 76, 60, 0.8)'],
+                            borderColor: ['rgba(46, 204, 113, 1)', 'rgba(231, 76, 60, 1)'],
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                ticks: {
+                                    callback: v => formatCurrency(v),
+                                    maxTicksLimit: 10
+                                }
+                            }
+                        },
+                        plugins: { legend: { display: false } }
+                    }
+                });
+                allCharts.push(chart);
+            }
+
+            // Risk metrics table
+            if (data.risk) {
+                const riskContainer = document.createElement('div');
+                riskContainer.className = 'table-container';
+                riskContainer.innerHTML = '<h3>Risk Metrics</h3>';
+                
+                const riskTable = document.createElement('table');
+                riskTable.innerHTML = `
+                    <thead>
+                        <tr>
+                            <th>Metric</th>
+                            <th>Value</th>
+                            <th>Description</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Max Drawdown</strong></td>
+                            <td class="${data.risk.max_drawdown < 0 ? 'stat-value negative' : 'stat-value'}">${formatCurrency(data.risk.max_drawdown)}</td>
+                            <td>The biggest loss from your highest point</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Max Drawdown %</strong></td>
+                            <td class="${data.risk.max_drawdown_pct < 0 ? 'stat-value negative' : 'stat-value'}">${formatPercent(data.risk.max_drawdown_pct)}</td>
+                            <td>Max drawdown as a percentage of your capital</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Sharpe Ratio</strong></td>
+                            <td class="${data.risk.sharpe_ratio > 0 ? 'stat-value positive' : 'stat-value negative'}">${data.risk.sharpe_ratio ? data.risk.sharpe_ratio.toFixed(2) : 'N/A'}</td>
+                            <td>Risk-adjusted return. Higher is better (above 1 is good)</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Profit Factor</strong></td>
+                            <td class="${data.risk.profit_factor > 1 ? 'stat-value positive' : 'stat-value negative'}">${data.risk.profit_factor ? data.risk.profit_factor.toFixed(2) : 'N/A'}</td>
+                            <td>Total wins divided by total losses. Above 1 means profitable</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Average Win</strong></td>
+                            <td class="stat-value positive">${formatCurrency(data.risk.avg_win)}</td>
+                            <td>Average profit per winning trade</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Average Loss</strong></td>
+                            <td class="stat-value negative">${formatCurrency(data.risk.avg_loss)}</td>
+                            <td>Average loss per losing trade</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Largest Win</strong></td>
+                            <td class="stat-value positive">${formatCurrency(data.risk.largest_win)}</td>
+                            <td>Your single best trade</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Largest Loss</strong></td>
+                            <td class="stat-value negative">${formatCurrency(data.risk.largest_loss)}</td>
+                            <td>Your single worst trade</td>
+                        </tr>
+                    </tbody>
+                `;
+                riskContainer.appendChild(riskTable);
+                section.appendChild(riskContainer);
+            }
+
+            content.appendChild(section);
+        }
+    </script>
+</body>
+</html>
+

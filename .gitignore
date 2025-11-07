@@ -1,0 +1,7 @@
+docs/
+results/
+benches/
+target/
+data/
+src/.DS_Store
+.DS_Store
