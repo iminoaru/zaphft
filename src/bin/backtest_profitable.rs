@@ -13,14 +13,14 @@ use std::time::Instant;
 
 fn main() -> anyhow::Result<()> {
     println!("╔══════════════════════════════════════════════════════════════╗");
-    println!("║          PROFITABLE MOMENTUM STRATEGY BACKTEST              ║");
+    println!("║          PROFITABLE MOMENTUM STRATEGY BACKTEST               ║");
     println!("╚══════════════════════════════════════════════════════════════╝\n");
 
     
     let num_snapshots = 200_000;
     let data_path = Path::new("data/L2_processed.csv");
 
-    println!("📋 Test Configuration:");
+    println!("Test Configuration:");
     println!("   Snapshots:     {}", num_snapshots);
     println!("   Strategy:      Momentum (Conservative Trend Following)");
     println!("   Trigger:       $15 price move");
@@ -28,11 +28,11 @@ fn main() -> anyhow::Result<()> {
     println!("   Max Position:  ±1.0 BTC");
     println!("   Lookback:      500 snapshots");
     println!();
-    println!("   💡 Fewer, higher-quality trades!");
+    println!("   Fewer, higher-quality trades!");
     println!();
 
     
-    println!("📖 Loading market data...");
+    println!("Loading market data...");
     let mut reader = SnapshotReader::new(data_path)?;
     let mut snapshots = Vec::new();
 
@@ -43,7 +43,7 @@ fn main() -> anyhow::Result<()> {
         }
     }
 
-    println!("✓ Loaded {} snapshots\n", snapshots.len());
+    println!("Loaded {} snapshots\n", snapshots.len());
 
     
     let first_mid = (snapshots[0].best_bid() + snapshots[0].best_ask()) / 2.0;
@@ -54,16 +54,16 @@ fn main() -> anyhow::Result<()> {
     let market_change = last_mid - first_mid;
     let market_pct = (market_change / first_mid) * 100.0;
 
-    println!("📊 Market Analysis:");
+    println!("Market Analysis:");
     println!("   Start Price:   ${:.2}", first_mid);
     println!("   End Price:     ${:.2}", last_mid);
     println!("   Change:        ${:.2} ({:+.2}%)", market_change, market_pct);
     println!();
 
     if market_change > 0.0 {
-        println!("   ✅ Bullish market - Momentum strategy should profit!");
+        println!("   Bullish market - Momentum strategy should profit!");
     } else {
-        println!("   ⚠️  Bearish market - Momentum may struggle");
+        println!("   WARNING: Bearish market - Momentum may struggle");
     }
     println!();
 
@@ -71,7 +71,7 @@ fn main() -> anyhow::Result<()> {
     
     
     println!("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
-    println!("🚀 RUNNING MOMENTUM STRATEGY");
+    println!("RUNNING MOMENTUM STRATEGY");
     println!("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
 
     let config = MomentumConfig {
@@ -95,7 +95,7 @@ fn main() -> anyhow::Result<()> {
     }
 
     let duration = start.elapsed();
-    println!("✓ Completed in {:?}\n", duration);
+    println!("Completed in {:?}\n", duration);
 
     
     let final_price = last_mid;
@@ -109,22 +109,22 @@ fn main() -> anyhow::Result<()> {
     
     
     println!("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
-    println!("📈 PERFORMANCE ANALYSIS");
+    println!("PERFORMANCE ANALYSIS");
     println!("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n");
 
     let pnl = result.metrics.total_pnl;
     let trades = result.metrics.total_trades;
 
     if trades == 0 {
-        println!("⚠️  No trades generated!");
+        println!("WARNING: No trades generated!");
         println!("   Market may not have moved enough ($5 threshold).");
         println!("   Try reducing trigger_threshold to see more signals.");
     } else {
-        println!("✅ Generated {} trades", trades);
+        println!("Generated {} trades", trades);
         println!();
 
         if pnl > 0.0 {
-            println!("💰 PROFITABLE STRATEGY!");
+            println!("PROFITABLE STRATEGY!");
             println!("   Total PnL:        ${:.2}", pnl);
             println!("   PnL per trade:    ${:.2}", pnl / trades as f64);
             println!("   Market capture:   {:.1}%", (pnl / market_change) * 100.0);
@@ -153,16 +153,16 @@ fn main() -> anyhow::Result<()> {
 
     
     let buy_hold_pnl = market_change * 0.1;  
-    println!("📊 Comparison:");
+    println!("Comparison:");
     println!("   Strategy PnL:     ${:.2}", pnl);
     println!("   Buy & Hold:       ${:.2} (0.1 BTC)", buy_hold_pnl);
 
     if pnl > buy_hold_pnl {
-        println!("   ✅ Strategy outperformed buy & hold!");
+        println!("   Strategy outperformed buy & hold!");
     } else if pnl > 0.0 {
-        println!("   ✅ Strategy profitable but underperformed buy & hold");
+        println!("   Strategy profitable but underperformed buy & hold");
     } else {
-        println!("   ❌ Strategy lost money");
+        println!("   Strategy lost money");
     }
 
     println!();

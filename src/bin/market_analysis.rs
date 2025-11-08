@@ -6,7 +6,7 @@ use rusthft::SnapshotReader;
 use std::path::Path;
 
 fn main() -> anyhow::Result<()> {
-    println!("📊 Market Movement Analysis\n");
+    println!("Market Movement Analysis\n");
     println!("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n");
 
     let num_snapshots = 200_000;
@@ -23,7 +23,7 @@ fn main() -> anyhow::Result<()> {
         }
     }
 
-    println!("✓ Loaded {} snapshots\n", snapshots.len());
+    println!("Loaded {} snapshots\n", snapshots.len());
 
     
     let mut min_bid = f64::MAX;
@@ -69,7 +69,7 @@ fn main() -> anyhow::Result<()> {
     };
 
     println!("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
-    println!("📈 PRICE RANGE");
+    println!("PRICE RANGE");
     println!("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
     println!("Best Bid:   ${:.2} to ${:.2}", min_bid, max_bid);
     println!("Best Ask:   ${:.2} to ${:.2}", min_ask, max_ask);
@@ -81,7 +81,7 @@ fn main() -> anyhow::Result<()> {
     println!();
 
     println!("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
-    println!("📊 SPREAD ANALYSIS");
+    println!("SPREAD ANALYSIS");
     println!("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
     println!("Average Spread:     ${:.2}", avg_spread);
     println!("Min Spread:         ${:.2}", spreads.iter().cloned().fold(f64::INFINITY, f64::min));
@@ -113,11 +113,11 @@ fn main() -> anyhow::Result<()> {
     println!();
 
     println!("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
-    println!("💡 ANALYSIS");
+    println!("ANALYSIS");
     println!("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
 
     if big_moves == 0 {
-        println!("❌ No moves > $0.10 detected!");
+        println!("ERROR: No moves > $0.10 detected!");
         println!("   This is why we got 0 fills.");
         println!();
         println!("Solutions:");
@@ -125,7 +125,7 @@ fn main() -> anyhow::Result<()> {
         println!("  2. Set spread_ticks to 0.0 (quote AT best)");
         println!("  3. Set spread_ticks to -0.5 (CROSS the spread)");
     } else {
-        println!("✓ Found {} moves > $0.10", big_moves);
+        println!("Found {} moves > $0.10", big_moves);
         println!("  We SHOULD have gotten fills...");
         println!("  Strategy logic might need adjustment.");
     }

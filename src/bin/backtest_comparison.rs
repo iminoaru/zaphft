@@ -24,14 +24,14 @@ fn main() -> anyhow::Result<()> {
     let num_snapshots = 200_000;
     let data_path = Path::new("data/L2_processed.csv");
 
-    println!("📋 Test Configuration:");
+    println!("Test Configuration:");
     println!("   Snapshots:  {}", num_snapshots);
     println!("   Data file:  {:?}", data_path);
     println!("   Approaches: 3 (Optimized HFT, Cached Naive, Pure Naive)");
     println!();
 
     
-    println!("📖 Loading market data...");
+    println!("Loading market data...");
     let mut reader = SnapshotReader::new(data_path)?;
     let mut snapshots = Vec::new();
 
@@ -42,7 +42,7 @@ fn main() -> anyhow::Result<()> {
         }
     }
 
-    println!("✓ Loaded {} snapshots\n", snapshots.len());
+    println!("Loaded {} snapshots\n", snapshots.len());
 
     let mut results = Vec::new();
 
@@ -50,7 +50,7 @@ fn main() -> anyhow::Result<()> {
     
     
     println!("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
-    println!("🚀 APPROACH 1: HFT Optimized (Direct Fields + Caching)");
+    println!("APPROACH 1: HFT Optimized (Direct Fields + Caching)");
     println!("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
 
     let config = MarketMakerConfig {
@@ -75,7 +75,7 @@ fn main() -> anyhow::Result<()> {
     }
 
     let duration = start.elapsed();
-    println!("✓ Completed in {:?}\n", duration);
+    println!("Completed in {:?}\n", duration);
 
     
     let final_price = {
@@ -95,7 +95,7 @@ fn main() -> anyhow::Result<()> {
     
     
     println!("\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
-    println!("📊 APPROACH 2: Cached Naive (HashMap + Caching)");
+    println!("APPROACH 2: Cached Naive (HashMap + Caching)");
     println!("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
 
     let naive_config = NaiveMarketMakerConfig {
@@ -127,7 +127,7 @@ fn main() -> anyhow::Result<()> {
     }
 
     let duration = start.elapsed();
-    println!("✓ Completed in {:?}\n", duration);
+    println!("Completed in {:?}\n", duration);
 
     
     let naive_stats = naive_strategy.stats();
@@ -154,7 +154,7 @@ fn main() -> anyhow::Result<()> {
     
     
     println!("\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
-    println!("🐌 APPROACH 3: Pure Naive (Recalculating + HashMap)");
+    println!("APPROACH 3: Pure Naive (Recalculating + HashMap)");
     println!("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
 
     let pure_naive_config = NaiveMarketMakerConfig {
@@ -186,7 +186,7 @@ fn main() -> anyhow::Result<()> {
     }
 
     let duration = start.elapsed();
-    println!("✓ Completed in {:?}\n", duration);
+    println!("Completed in {:?}\n", duration);
 
     
     let pure_naive_stats = pure_naive_strategy.stats();
@@ -218,20 +218,20 @@ fn main() -> anyhow::Result<()> {
     
     
     println!("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
-    println!("🔍 KEY INSIGHTS");
+    println!("KEY INSIGHTS");
     println!("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n");
 
     println!("1. HFT Optimized:");
-    println!("   ✓ Direct struct field access (config.spread_ticks)");
-    println!("   ✓ Cached position state (quantity, avg_price, realized_pnl)");
-    println!("   ✓ Zero allocations in hot path");
-    println!("   ✓ Cache-friendly memory layout");
+    println!("   Direct struct field access (config.spread_ticks)");
+    println!("   Cached position state (quantity, avg_price, realized_pnl)");
+    println!("   Zero allocations in hot path");
+    println!("   Cache-friendly memory layout");
     println!();
 
     println!("2. Cached Naive:");
     println!("   • HashMap for config (hash + bucket lookup overhead)");
     println!("   • String keys require hashing on every access");
-    println!("   ✓ Still has cached position state");
+    println!("   Still has cached position state");
     println!("   • Pointer indirection for HashMap values");
     println!();
 
@@ -273,7 +273,7 @@ fn main() -> anyhow::Result<()> {
     println!();
 
     println!("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
-    println!("\n✅ Backtest comparison complete!");
+    println!("\nBacktest comparison complete!");
     println!("   All three approaches produced identical trading results.");
     println!("   Performance differences are purely from implementation choices.\n");
 

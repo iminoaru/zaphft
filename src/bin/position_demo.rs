@@ -13,11 +13,11 @@ use rusthft::trivial_approach::{NaivePosition, CachedNaivePosition};
 use std::time::Instant;
 
 fn main() -> Result<()> {
-    println!("💼 Position Tracking & PnL Demo\n");
+    println!("Position Tracking & PnL Demo\n");
     println!("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n");
 
     
-    println!("📊 Example 1: Simple Long Position");
+    println!("Example 1: Simple Long Position");
     println!("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n");
 
     let mut pos = Position::new();
@@ -31,16 +31,16 @@ fn main() -> Result<()> {
 
     println!("\n   Market moves to $17,200.00");
     let unrealized = pos.unrealized_pnl(17200.00);
-    println!("   Unrealized PnL: ${:.2} ✅", unrealized);
+    println!("   Unrealized PnL: ${:.2}", unrealized);
 
     println!("\n   Sell 1 BTC at $17,200.00 (close position)");
     pos.execute_trade(Trade::new(Side::Ask, 17200.00, 1.0, 1));
 
     println!("   Position: {:.4} BTC (flat)", pos.quantity);
-    println!("   Realized PnL: ${:.2} ✅", pos.realized_pnl);
+    println!("   Realized PnL: ${:.2}", pos.realized_pnl);
 
     
-    println!("\n\n📊 Example 2: Averaging Down");
+    println!("\n\nExample 2: Averaging Down");
     println!("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n");
 
     let mut pos = Position::new();
@@ -50,7 +50,7 @@ fn main() -> Result<()> {
     println!("   Entry Price: ${:.2}", pos.avg_entry_price);
 
     println!("\n   Market drops to $17,100.00");
-    println!("   Unrealized PnL: ${:.2} ❌", pos.unrealized_pnl(17100.00));
+    println!("   Unrealized PnL: ${:.2}", pos.unrealized_pnl(17100.00));
 
     println!("\n   Buy 1 more BTC at $17,100.00 (averaging down)");
     pos.execute_trade(Trade::new(Side::Bid, 17100.00, 1.0, 1));
@@ -58,10 +58,10 @@ fn main() -> Result<()> {
     println!("   Average Entry Price: ${:.2}", pos.avg_entry_price);
 
     println!("\n   Market recovers to $17,150.00");
-    println!("   Unrealized PnL: ${:.2} ✅", pos.unrealized_pnl(17150.00));
+    println!("   Unrealized PnL: ${:.2}", pos.unrealized_pnl(17150.00));
 
     
-    println!("\n\n📊 Example 3: Position Flip (Long → Short)");
+    println!("\n\nExample 3: Position Flip (Long → Short)");
     println!("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n");
 
     let mut pos = Position::new();
@@ -77,10 +77,10 @@ fn main() -> Result<()> {
     println!("   New Entry Price: ${:.2}", pos.avg_entry_price);
 
     println!("\n   Market moves to $17,220.00");
-    println!("   Unrealized PnL: ${:.2} ✅ (profit on short)", pos.unrealized_pnl(17220.00));
+    println!("   Unrealized PnL: ${:.2} (profit on short)", pos.unrealized_pnl(17220.00));
 
     
-    println!("\n\n📊 Example 4: Partial Position Close");
+    println!("\n\nExample 4: Partial Position Close");
     println!("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n");
 
     let mut pos = Position::new();
@@ -102,10 +102,10 @@ fn main() -> Result<()> {
     println!("\n   Sell final 1 BTC at $17,250.00");
     pos.execute_trade(Trade::new(Side::Ask, 17250.00, 1.0, 3));
     println!("   Position: {:.4} BTC (flat)", pos.quantity);
-    println!("   Total Realized PnL: ${:.2} ✅", pos.realized_pnl);
+    println!("   Total Realized PnL: ${:.2}", pos.realized_pnl);
 
     
-    println!("\n\n⚡ Performance Comparison: THREE Approaches");
+    println!("\n\nPerformance Comparison: THREE Approaches");
     println!("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n");
 
     let num_trades = 10_000;
@@ -181,16 +181,16 @@ fn main() -> Result<()> {
     let diff1 = (opt_pos.quantity - cached_naive_pos.quantity()).abs();
     let diff2 = (opt_pos.quantity - naive_pos.quantity()).abs();
     if diff1 < 1e-6 && diff2 < 1e-6 {
-        println!("   ✅ All results match!");
+        println!("   All results match!");
     } else {
-        println!("   ❌ Results differ!");
+        println!("   Results differ!");
     }
 
     
     let stats = opt_pos.stats(17100.0);
     stats.print();
 
-    println!("\n💡 Key Insights:");
+    println!("\nKey Insights:");
     println!("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
     println!("   • Caching provides {:.0}× speedup", cache_benefit);
     println!("   • BUT even with caching, HashMap is {:.1}× slower than direct fields", speedup_vs_cached);

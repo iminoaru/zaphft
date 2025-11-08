@@ -17,17 +17,17 @@ fn main() -> anyhow::Result<()> {
     let config = parse_args(&args)?;
 
     println!("╔══════════════════════════════════════════════════════════════╗");
-    println!("║           BACKTEST EXPORT - DATA FOR VISUALIZATION          ║");
+    println!("║           BACKTEST EXPORT - DATA FOR VISUALIZATION           ║");
     println!("╚══════════════════════════════════════════════════════════════╝\n");
 
-    println!("📋 Export Configuration:");
+    println!("Export Configuration:");
     println!("   Strategy:      {:?}", config.strategy);
     println!("   Snapshots:     {}", config.num_snapshots);
     println!("   Output:        {}", config.output_path.display());
     println!();
 
     
-    println!("📖 Loading market data...");
+    println!("Loading market data...");
     let data_path = Path::new("data/L2_processed.csv");
     let mut reader = SnapshotReader::new(data_path)?;
     let mut snapshots = Vec::new();
@@ -39,7 +39,7 @@ fn main() -> anyhow::Result<()> {
         }
     }
 
-    println!("✓ Loaded {} snapshots\n", snapshots.len());
+    println!("Loaded {} snapshots\n", snapshots.len());
 
     
     let start_price = (snapshots[0].best_bid() + snapshots[0].best_ask()) / 2.0;
@@ -48,7 +48,7 @@ fn main() -> anyhow::Result<()> {
         (last.best_bid() + last.best_ask()) / 2.0
     };
 
-    println!("📊 Market Overview:");
+    println!("Market Overview:");
     println!("   Start Price:   ${:.2}", start_price);
     println!("   End Price:     ${:.2}", final_price);
     println!("   Change:        ${:.2} ({:+.2}%)", final_price - start_price, ((final_price - start_price) / start_price) * 100.0);
@@ -64,7 +64,7 @@ fn main() -> anyhow::Result<()> {
         }
     }
 
-    println!("\n✅ Export complete!");
+    println!("\nExport complete!");
     println!("   Output: {}", config.output_path.display());
     println!();
 
@@ -91,7 +91,7 @@ fn export_momentum(
 ) -> anyhow::Result<()> {
     const STARTING_CAPITAL: f64 = 10_000.0;  
     println!("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
-    println!("🚀 EXPORTING MOMENTUM STRATEGY");
+    println!("EXPORTING MOMENTUM STRATEGY");
     println!("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
 
     let config = MomentumConfig {
@@ -188,7 +188,7 @@ fn export_momentum(
     
     export.to_file(output_path)?;
 
-    println!("✓ Momentum strategy exported");
+    println!("Momentum strategy exported");
     println!("   Starting Capital: ${:.2}", STARTING_CAPITAL);
     println!("   Final Capital:    ${:.2}", STARTING_CAPITAL + result.metrics.total_pnl);
     println!("   Total PnL:        ${:.2}", result.metrics.total_pnl);
@@ -205,7 +205,7 @@ fn export_performance_comparison(
     output_path: &Path,
 ) -> anyhow::Result<()> {
     println!("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
-    println!("⚡ EXPORTING MOMENTUM PERFORMANCE COMPARISON");
+    println!("EXPORTING MOMENTUM PERFORMANCE COMPARISON");
     println!("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
 
     let final_price = {
@@ -292,7 +292,7 @@ fn export_performance_comparison(
 
     comparison.to_file(output_path)?;
 
-    println!("✓ Performance comparison exported");
+    println!("Performance comparison exported");
     println!();
     println!("   HFT Optimized:  {:.2} ns/snapshot", results[0].timing.time_per_snapshot.as_nanos());
     println!("   Cached Naive:   {:.2} ns/snapshot ({:.1}× slower)",

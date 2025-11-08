@@ -22,18 +22,18 @@ fn main() -> anyhow::Result<()> {
     let num_snapshots = 200_000;
     let data_path = Path::new("data/L2_processed.csv");
 
-    println!("📋 Test Configuration:");
+    println!("Test Configuration:");
     println!("   Snapshots:     {}", num_snapshots);
     println!("   Strategy:      Market Maker (Passive)");
     println!("   Spread:        +1 tick ($0.10 AWAY from market)");
     println!("   Quote Size:    0.1 BTC");
     println!("   Max Position:  ±2.0 BTC");
     println!();
-    println!("   💡 Earn the bid-ask spread by providing liquidity!");
+    println!("   Earn the bid-ask spread by providing liquidity!");
     println!();
 
     
-    println!("📖 Loading market data...");
+    println!("Loading market data...");
     let mut reader = SnapshotReader::new(data_path)?;
     let mut snapshots = Vec::new();
 
@@ -44,7 +44,7 @@ fn main() -> anyhow::Result<()> {
         }
     }
 
-    println!("✓ Loaded {} snapshots\n", snapshots.len());
+    println!("Loaded {} snapshots\n", snapshots.len());
 
     
     let first_mid = (snapshots[0].best_bid() + snapshots[0].best_ask()) / 2.0;
@@ -53,7 +53,7 @@ fn main() -> anyhow::Result<()> {
         (last.best_bid() + last.best_ask()) / 2.0
     };
 
-    println!("📊 Market Analysis:");
+    println!("Market Analysis:");
     println!("   Start Price:   ${:.2}", first_mid);
     println!("   End Price:     ${:.2}", last_mid);
     println!("   Change:        ${:.2} ({:+.2}%)", last_mid - first_mid, ((last_mid - first_mid) / first_mid) * 100.0);
@@ -63,7 +63,7 @@ fn main() -> anyhow::Result<()> {
     
     
     println!("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
-    println!("🏦 RUNNING MARKET MAKER (Passive Configuration)");
+    println!("RUNNING MARKET MAKER (Passive Configuration)");
     println!("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
 
     let config = MarketMakerConfig {
@@ -93,7 +93,7 @@ fn main() -> anyhow::Result<()> {
     }
 
     let duration = start.elapsed();
-    println!("✓ Completed in {:?}\n", duration);
+    println!("Completed in {:?}\n", duration);
 
     
     let final_price = last_mid;
@@ -107,20 +107,20 @@ fn main() -> anyhow::Result<()> {
     
     
     println!("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
-    println!("📈 MARKET MAKING ANALYSIS");
+    println!("MARKET MAKING ANALYSIS");
     println!("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n");
 
     let pnl = result.metrics.total_pnl;
     let trades = result.metrics.total_trades;
     let quotes = result.metrics.quotes_placed;
 
-    println!("📊 Trading Activity:");
+    println!("Trading Activity:");
     println!("   Quotes Placed:     {}", quotes);
     println!("   Trades Executed:   {}", trades);
 
     if trades == 0 {
         println!();
-        println!("⚠️  No fills received!");
+        println!("WARNING: No fills received!");
         println!();
         println!("This is REALISTIC for passive market making:");
         println!("  • We quote AWAY from the market");
@@ -143,7 +143,7 @@ fn main() -> anyhow::Result<()> {
         println!();
 
         if pnl > 0.0 {
-            println!("💰 PROFITABLE MARKET MAKING!");
+            println!("PROFITABLE MARKET MAKING!");
             println!("   Total PnL:         ${:.2}", pnl);
             println!("   PnL per trade:     ${:.2}", pnl / trades as f64);
             println!("   Spread earned:     ${:.2}", pnl);
@@ -157,26 +157,26 @@ fn main() -> anyhow::Result<()> {
 
     println!();
     println!("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
-    println!("💡 KEY INSIGHTS");
+    println!("KEY INSIGHTS");
     println!("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n");
 
     println!("Market Maker vs Momentum:");
     println!();
     println!("MARKET MAKER (Passive):");
-    println!("  ✓ Quotes AWAY from market");
-    println!("  ✓ Earns bid-ask spread (~$0.10 per fill)");
-    println!("  ✓ Low risk (don't cross spread)");
-    println!("  ✓ Works in ANY market (up, down, sideways)");
-    println!("  ✓ Provides liquidity to market");
+    println!("  Quotes AWAY from market");
+    println!("  Earns bid-ask spread (~$0.10 per fill)");
+    println!("  Low risk (don't cross spread)");
+    println!("  Works in ANY market (up, down, sideways)");
+    println!("  Provides liquidity to market");
     println!("  → Realistic config: spread_ticks = +1.0");
     println!();
 
     println!("MOMENTUM (Active):");
-    println!("  ✓ Follows trends");
-    println!("  ✓ Bigger profits when right (+$19 in our test)");
-    println!("  ✗ Higher risk (can whipsaw in choppy markets)");
-    println!("  ✗ Only works in trending markets");
-    println!("  ✓ Crosses spread to get fills");
+    println!("  Follows trends");
+    println!("  Bigger profits when right (+$19 in our test)");
+    println!("  Higher risk (can whipsaw in choppy markets)");
+    println!("  Only works in trending markets");
+    println!("  Crosses spread to get fills");
     println!("  → Config: trigger_threshold = $15, lookback = 500");
     println!();
 

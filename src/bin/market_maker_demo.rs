@@ -16,7 +16,7 @@ use std::time::Instant;
 use std::path::Path;
 
 fn main() -> anyhow::Result<()> {
-    println!("📊 Market Making Strategy Demo");
+    println!("Market Making Strategy Demo");
     println!("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n");
 
     
@@ -66,7 +66,7 @@ fn main() -> anyhow::Result<()> {
         }
     }
 
-    println!("✓ Loaded {} snapshots\n", snapshots.len());
+    println!("Loaded {} snapshots\n", snapshots.len());
 
     
     
@@ -90,7 +90,7 @@ fn main() -> anyhow::Result<()> {
     let opt_unrealized = position.unrealized_pnl(final_price);
     let opt_total_pnl = position.realized_pnl + opt_unrealized;
 
-    println!("✓ Completed in {:?}", opt_duration);
+    println!("Completed in {:?}", opt_duration);
     println!();
 
     
@@ -112,14 +112,14 @@ fn main() -> anyhow::Result<()> {
     let naive_unrealized = naive_position.unrealized_pnl(final_price);
     let naive_total_pnl = naive_position.realized_pnl + naive_unrealized;
 
-    println!("✓ Completed in {:?}", naive_duration);
+    println!("Completed in {:?}", naive_duration);
     println!();
 
     
     
     
     println!("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
-    println!("📈 OPTIMIZED MARKET MAKER RESULTS");
+    println!("OPTIMIZED MARKET MAKER RESULTS");
     println!("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
     println!("Strategy Statistics:");
     println!("  • Updates processed:  {}", opt_stats.updates_processed);
@@ -166,12 +166,12 @@ fn main() -> anyhow::Result<()> {
     let naive_ns_per_update = naive_duration.as_nanos() as f64 / snapshots.len() as f64;
 
     println!("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
-    println!("⚡ PERFORMANCE COMPARISON");
+    println!("PERFORMANCE COMPARISON");
     println!("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
     println!("Optimized:  {:.2} ns per update", opt_ns_per_update);
     println!("Naive:      {:.2} ns per update", naive_ns_per_update);
     println!();
-    println!("🚀 Speedup: {:.2}× faster", speedup);
+    println!("Speedup: {:.2}× faster", speedup);
     println!();
 
     
@@ -197,21 +197,21 @@ fn main() -> anyhow::Result<()> {
     let position_match = (position.quantity - naive_position.quantity).abs() < 1e-6;
     let pnl_match = (opt_total_pnl - naive_total_pnl).abs() < 1e-2;
 
-    println!("  • Trades match:    {} {}", if trades_match { "✓" } else { "✗" },
+    println!("  • Trades match:    {} {}", if trades_match { "OK" } else { "FAIL" },
              if !trades_match { format!("({} vs {})", opt_stats.trades_generated, naive_stats.trades_generated) } else { String::new() });
-    println!("  • Quotes match:    {} {}", if quotes_match { "✓" } else { "✗" },
+    println!("  • Quotes match:    {} {}", if quotes_match { "OK" } else { "FAIL" },
              if !quotes_match { format!("({} vs {})", opt_stats.quotes_placed, naive_stats.quotes_placed) } else { String::new() });
-    println!("  • Position match:  {} {}", if position_match { "✓" } else { "✗" },
+    println!("  • Position match:  {} {}", if position_match { "OK" } else { "FAIL" },
              if !position_match { format!("({:.3} vs {:.3})", position.quantity, naive_position.quantity) } else { String::new() });
-    println!("  • PnL match:       {} {}", if pnl_match { "✓" } else { "✗" },
+    println!("  • PnL match:       {} {}", if pnl_match { "OK" } else { "FAIL" },
              if !pnl_match { format!("(${:.2} vs ${:.2})", opt_total_pnl, naive_total_pnl) } else { String::new() });
 
     if trades_match && quotes_match && position_match && pnl_match {
         println!();
-        println!("✅ Both strategies produce identical results!");
+        println!("Both strategies produce identical results!");
     } else {
         println!();
-        println!("⚠️  Results differ - check implementation");
+        println!("WARNING: Results differ - check implementation");
     }
 
     Ok(())

@@ -15,24 +15,24 @@ use std::time::Instant;
 
 fn main() -> anyhow::Result<()> {
     println!("╔══════════════════════════════════════════════════════════════╗");
-    println!("║     AGGRESSIVE BACKTEST: CROSSING THE SPREAD FOR FILLS      ║");
+    println!("║     AGGRESSIVE BACKTEST: CROSSING THE SPREAD FOR FILLS       ║");
     println!("╚══════════════════════════════════════════════════════════════╝\n");
 
     
     let num_snapshots = 200_000;
     let data_path = Path::new("data/L2_processed.csv");
 
-    println!("📋 Test Configuration:");
+    println!("Test Configuration:");
     println!("   Snapshots:  {}", num_snapshots);
     println!("   Data file:  {:?}", data_path);
     println!("   Strategy:   AGGRESSIVE (crossing spread)");
     println!("   Spread:     -2.0 ticks (WAY inside the market)");
     println!();
-    println!("   💡 This will generate INSTANT FILLS on every quote!");
+    println!("   This will generate INSTANT FILLS on every quote!");
     println!();
 
     
-    println!("📖 Loading market data...");
+    println!("Loading market data...");
     let mut reader = SnapshotReader::new(data_path)?;
     let mut snapshots = Vec::new();
 
@@ -43,7 +43,7 @@ fn main() -> anyhow::Result<()> {
         }
     }
 
-    println!("✓ Loaded {} snapshots\n", snapshots.len());
+    println!("Loaded {} snapshots\n", snapshots.len());
 
     let mut results = Vec::new();
 
@@ -51,7 +51,7 @@ fn main() -> anyhow::Result<()> {
     
     
     println!("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
-    println!("🚀 APPROACH 1: HFT Optimized (Direct Fields + Caching)");
+    println!("APPROACH 1: HFT Optimized (Direct Fields + Caching)");
     println!("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
 
     let config = MarketMakerConfig {
@@ -76,7 +76,7 @@ fn main() -> anyhow::Result<()> {
     }
 
     let duration = start.elapsed();
-    println!("✓ Completed in {:?}\n", duration);
+    println!("Completed in {:?}\n", duration);
 
     
     let final_price = {
@@ -96,7 +96,7 @@ fn main() -> anyhow::Result<()> {
     
     
     println!("\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
-    println!("📊 APPROACH 2: Cached Naive (HashMap + Caching)");
+    println!("APPROACH 2: Cached Naive (HashMap + Caching)");
     println!("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
 
     let naive_config = NaiveMarketMakerConfig {
@@ -128,7 +128,7 @@ fn main() -> anyhow::Result<()> {
     }
 
     let duration = start.elapsed();
-    println!("✓ Completed in {:?}\n", duration);
+    println!("Completed in {:?}\n", duration);
 
     
     let naive_stats = naive_strategy.stats();
@@ -155,7 +155,7 @@ fn main() -> anyhow::Result<()> {
     
     
     println!("\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
-    println!("🐌 APPROACH 3: Pure Naive (Recalculating + HashMap)");
+    println!("APPROACH 3: Pure Naive (Recalculating + HashMap)");
     println!("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
 
     let pure_naive_config = NaiveMarketMakerConfig {
@@ -169,7 +169,7 @@ fn main() -> anyhow::Result<()> {
     let mut pure_naive_position = NaivePosition::new();
 
     println!("Running backtest...");
-    println!("⚠️  This will be MUCH slower with thousands of trades!");
+    println!("WARNING: This will be MUCH slower with thousands of trades!");
     let start = Instant::now();
 
     for snapshot in &snapshots {
@@ -188,7 +188,7 @@ fn main() -> anyhow::Result<()> {
     }
 
     let duration = start.elapsed();
-    println!("✓ Completed in {:?}\n", duration);
+    println!("Completed in {:?}\n", duration);
 
     
     let pure_naive_stats = pure_naive_strategy.stats();
@@ -220,18 +220,18 @@ fn main() -> anyhow::Result<()> {
     
     
     println!("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
-    println!("💰 TRADING INSIGHTS");
+    println!("TRADING INSIGHTS");
     println!("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n");
 
     let opt_trades = results[0].metrics.total_trades;
     let opt_pnl = results[0].metrics.total_pnl;
 
     if opt_trades > 0 {
-        println!("✅ Generated {} trades!", opt_trades);
+        println!("Generated {} trades!", opt_trades);
         println!("   Total PnL: ${:.2}", opt_pnl);
         println!();
         if opt_pnl < 0.0 {
-            println!("   ⚠️  Negative PnL expected when crossing spread!");
+            println!("   WARNING: Negative PnL expected when crossing spread!");
             println!("   We're paying the bid-ask spread on every trade.");
             println!("   This is a TAKER strategy, not a MAKER strategy.");
             println!();
@@ -242,7 +242,7 @@ fn main() -> anyhow::Result<()> {
         println!("   • All 3 approaches produce identical results");
         println!("   • Performance differences are ONLY from implementation");
     } else {
-        println!("⚠️  Still no trades? Check strategy logic.");
+        println!("WARNING: Still no trades? Check strategy logic.");
     }
 
     println!();

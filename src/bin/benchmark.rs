@@ -19,12 +19,12 @@ fn main() -> Result<()> {
     let data_path = Path::new("data/L2_processed.csv");
 
     if !data_path.exists() {
-        println!("❌ Data file not found!");
+        println!("ERROR: Data file not found!");
         return Ok(());
     }
 
     
-    println!("📖 Loading 10,000 snapshots...\n");
+    println!("Loading 10,000 snapshots...\n");
     let mut reader = SnapshotReader::new(data_path)?;
     let mut optimized_snapshots = Vec::new();
 
@@ -35,7 +35,7 @@ fn main() -> Result<()> {
         }
     }
 
-    println!("✓ Loaded {} snapshots\n", optimized_snapshots.len());
+    println!("Loaded {} snapshots\n", optimized_snapshots.len());
 
     
     let naive_snapshots: Vec<NaiveSnapshot> = optimized_snapshots
@@ -74,7 +74,7 @@ fn main() -> Result<()> {
         .collect();
 
     println!("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
-    println!("🚀 BENCHMARK 1: Basic Operations");
+    println!("BENCHMARK 1: Basic Operations");
     println!("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n");
 
     
@@ -103,7 +103,7 @@ fn main() -> Result<()> {
     let naive_ns = naive_time.as_nanos() / naive_snapshots.len() as u128;
     let speedup = naive_time.as_nanos() as f64 / optimized_time.as_nanos() as f64;
 
-    println!("📊 Results (10,000 iterations):\n");
+    println!("Results (10,000 iterations):\n");
     println!("   Optimized Approach:");
     println!("      Total Time:  {:?}", optimized_time);
     println!("      Per Op:      {} ns", optimized_ns);
@@ -114,10 +114,10 @@ fn main() -> Result<()> {
     println!("      Per Op:      {} ns", naive_ns);
     println!("      Rate:        {:.0} ops/sec", 1_000_000_000.0 / naive_ns as f64);
     println!();
-    println!("   ⚡ Speedup:     {:.2}× faster", speedup);
+    println!("   Speedup:     {:.2}× faster", speedup);
 
     println!("\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
-    println!("🔍 BENCHMARK 2: Depth Calculations");
+    println!("BENCHMARK 2: Depth Calculations");
     println!("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n");
 
     
@@ -146,7 +146,7 @@ fn main() -> Result<()> {
     let naive_depth_ns = naive_depth_time.as_nanos() / 1000;
     let depth_speedup = naive_depth_time.as_nanos() as f64 / optimized_depth_time.as_nanos() as f64;
 
-    println!("📊 Results (1,000 iterations):\n");
+    println!("Results (1,000 iterations):\n");
     println!("   Optimized Approach:");
     println!("      Total Time:  {:?}", optimized_depth_time);
     println!("      Per Op:      {} ns", opt_depth_ns);
@@ -155,10 +155,10 @@ fn main() -> Result<()> {
     println!("      Total Time:  {:?}", naive_depth_time);
     println!("      Per Op:      {} ns", naive_depth_ns);
     println!();
-    println!("   ⚡ Speedup:     {:.2}× faster", depth_speedup);
+    println!("   Speedup:     {:.2}× faster", depth_speedup);
 
     println!("\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
-    println!("📊 BENCHMARK 3: Market Making Strategy");
+    println!("BENCHMARK 3: Market Making Strategy");
     println!("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n");
 
     
@@ -206,7 +206,7 @@ fn main() -> Result<()> {
     let naive_strat_ns = naive_strategy_time.as_nanos() / optimized_snapshots.len() as u128;
     let strategy_speedup = naive_strategy_time.as_nanos() as f64 / opt_strategy_time.as_nanos() as f64;
 
-    println!("📊 Results (10,000 iterations):\n");
+    println!("Results (10,000 iterations):\n");
     println!("   Optimized Market Maker:");
     println!("      Total Time:  {:?}", opt_strategy_time);
     println!("      Per Update:  {} ns", opt_strat_ns);
@@ -219,7 +219,7 @@ fn main() -> Result<()> {
     println!("      Trades:      {}", naive_mm.stats().trades_generated);
     println!("      Quotes:      {}", naive_mm.stats().quotes_placed);
     println!();
-    println!("   ⚡ Speedup:     {:.2}× faster", strategy_speedup);
+    println!("   Speedup:     {:.2}× faster", strategy_speedup);
     println!();
     println!("   Why the difference?");
     println!("      • Optimized: Direct struct fields (config.spread_ticks)");
@@ -239,7 +239,7 @@ fn main() -> Result<()> {
              naive_snap_size as f64 / opt_snap_size as f64);
 
     println!("\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
-    println!("📋 Summary");
+    println!("Summary");
     println!("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n");
 
     println!("   The optimized approach is:");
