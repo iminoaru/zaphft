@@ -184,20 +184,3 @@ The release build enables Link-Time Optimization (LTO) and aggressive optimizati
 ## 🤝 Contributing
 
 Contributions are welcome! Please feel free to submit a Pull Request.
-
-## 📄 License
-
-This project is open source and available under the MIT License.
-
-## ⚠️ Disclaimer
-
-This software is for educational and research purposes only. It is not financial advice. Use at your own risk. Past performance does not guarantee future results.
-
-## 📧 Contact
-
-- GitHub: [@iminoaru](https://github.com/iminoaru)
-- Repository: [zaphft](https://github.com/iminoaru/zaphft)
-
----
-
-Built with ❤️ and Rust 🦀
