@@ -2,7 +2,7 @@
 
 A high-performance algorithmic trading backtesting engine written in Rust, focused on high-frequency trading (HFT) strategies with Level 2 market data.
 
-## 🚀 Features
+## Features
 
 - **Level 2 Order Book Processing**: Real-time order book reconstruction and analysis from snapshot data
 - **Multiple Trading Strategies**:
@@ -21,12 +21,12 @@ A high-performance algorithmic trading backtesting engine written in Rust, focus
 - **Ultra-low Latency**: Optimized for microsecond-level processing
 - **Export Capabilities**: CSV export for further analysis
 
-## 📋 Requirements
+## Requirements
 
 - Rust 1.70 or later
 - Cargo package manager
 
-## 🔧 Installation
+## Installation
 
 Clone the repository and build the project:
 
@@ -36,7 +36,7 @@ cd zaphft
 cargo build --release
 ```
 
-## 🎯 Usage
+## Usage
 
 ### Running Backtests
 
@@ -74,7 +74,27 @@ cargo run --release --bin position_demo
 cargo run --release
 ```
 
-## 📊 Data Format
+### Batch Export Script
+
+The `run_engine.sh` script automates the generation of multiple backtest exports for analysis:
+
+```bash
+bash run_engine.sh
+```
+
+This script will:
+- Create a `benches/` directory for output files
+- Generate full dataset exports (3.7M snapshots) for momentum and performance strategies
+- Generate smaller exports (200k snapshots) for quick analysis
+- Export results in JSON format for visualization and further processing
+
+Output files:
+- `benches/momentum_full.json` - Full momentum strategy backtest
+- `benches/performance_full.json` - Full performance strategy backtest
+- `benches/momentum_200k.json` - 200k snapshot momentum backtest
+- `benches/performance_200k.json` - 200k snapshot performance backtest
+
+## Data Format
 
 The engine expects Level 2 order book data in CSV format with the following structure:
 
@@ -84,7 +104,7 @@ The engine expects Level 2 order book data in CSV format with the following stru
 
 Example data file location: `data/L2_processed.csv`
 
-## 🏗️ Project Structure
+## Project Structure
 
 ```
 src/
@@ -101,7 +121,7 @@ src/
 └── utils/              # CSV processing utilities
 ```
 
-## ⚙️ Configuration
+## Configuration
 
 ### Market Maker Configuration
 
@@ -118,7 +138,7 @@ MarketMakerConfig {
 }
 ```
 
-## 📈 Performance Metrics
+## Performance Metrics
 
 The engine calculates comprehensive performance metrics:
 
@@ -129,7 +149,7 @@ The engine calculates comprehensive performance metrics:
 - **Trade Count**: Number of executed trades
 - **Average Trade P&L**: Mean profit per trade
 
-## 🔬 Benchmarks
+## Benchmarks
 
 The engine is optimized for high-frequency trading with typical performance:
 
@@ -142,7 +162,7 @@ Run benchmarks with:
 cargo run --release --bin benchmark
 ```
 
-## 🛠️ Development
+## Development
 
 ### Running Tests
 
@@ -158,7 +178,7 @@ cargo build --release
 
 The release build enables Link-Time Optimization (LTO) and aggressive optimizations for maximum performance.
 
-## 📝 Key Components
+## Key Components
 
 ### Order Book (`orderbook/`)
 - Fast order book reconstruction from L2 snapshots
@@ -181,6 +201,15 @@ The release build enables Link-Time Optimization (LTO) and aggressive optimizati
 - Trade export to CSV
 - Statistical analysis
 
-## 🤝 Contributing
+## License
 
-Contributions are welcome! Please feel free to submit a Pull Request.
+This project is open source and available under the MIT License.
+
+## Disclaimer
+
+This software is for educational and research purposes only. It is not financial advice. Use at your own risk. Past performance does not guarantee future results.
+
+## Contact
+
+- GitHub: [@iminoaru](https://github.com/iminoaru)
+- Repository: [zaphft](https://github.com/iminoaru/zaphft)
